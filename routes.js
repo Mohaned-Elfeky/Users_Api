@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('./models/User');
-const passwordHash = require('password-hash');
+const passwordHash = require('password-hash');  //password hashing module
 const { request } = require('express');
 
 //getUsers
@@ -11,14 +11,14 @@ router.get('/:email',(req,res)=>{
     
     
     
-    User.count({email:email_in}, function (err, count){
+    User.count({email:email_in}, function (err, count){       //check if the requested email exists
         if(err){
             console.log("MongoDB Error: " + err);
             return false;
         } 
         
         if(count>0){
-            var query = User.findOne({email:req.params.email}).select('name -_id email');
+            var query = User.findOne({email:req.params.email}).select('name -_id email');    //returns the user's details whose email was requested 
             query.exec(function (err, data) {
                 if (err) return next(err);
                 res.json(data);
@@ -38,7 +38,7 @@ router.get('/:email',(req,res)=>{
 router.patch('/:email',(req,res)=>{
     const email_in=req.params.email
     const new_email=req.body.email
-    User.count({email:email_in}, function (err, count) {
+    User.count({email:email_in}, function (err, count) {    //check if the requested email exists
       
         if(err){
             console.log("MongoDB Error: " + err);
@@ -47,7 +47,7 @@ router.patch('/:email',(req,res)=>{
         
         
         if (count>0){
-            User.updateOne({email:email_in},{$set:{email:new_email}},(error,data)=>{
+            User.updateOne({email:email_in},{$set:{email:new_email}},(error,data)=>{        //changes the user's email to the one provided in the request's body
                 if(error){
                     console.log(error);
                }
@@ -69,7 +69,7 @@ router.patch('/:email',(req,res)=>{
 //Delete
 router.delete('/:email',(req,res) =>{
     const email_in=req.params.email 
-    User.count({email:email_in }, function (err, count) {
+    User.count({email:email_in }, function (err, count) {      //check if the requested email exists
       
         if(err){
             console.log("MongoDB Error: " + err);
@@ -78,7 +78,7 @@ router.delete('/:email',(req,res) =>{
         
         
         if (count>0){
-            User.deleteOne({email:email_in},(error,data)=>{
+            User.deleteOne({email:email_in},(error,data)=>{                //deletes the user whose email was sent in the request
                 if(error){
                     console.log(error);
                }
@@ -105,7 +105,7 @@ router.delete('/:email',(req,res) =>{
 //ADD
 router.post('/',(req,res)=>{
     
-    User.count({email: req.body.email}, function (err, count) {
+    User.count({email: req.body.email}, function (err, count) {       //check if the requested email exists
       
         if(err){
             console.log("MongoDB Error: " + err);
@@ -117,8 +117,8 @@ router.post('/',(req,res)=>{
             res.json("email already exists")
         }
         else{
-            const hashedPassword = passwordHash.generate(req.body.password); 
-            const user = new User({
+            const hashedPassword = passwordHash.generate(req.body.password); //hash password for security
+            const user = new User({                      //creates a new user with the provided details from the request body
                 name: req.body.name,
                 password: hashedPassword,
                 email: req.body.email
@@ -126,7 +126,7 @@ router.post('/',(req,res)=>{
             
             user.save()
             .then(data => {
-                res.json("Added new user with name: "+user.name);
+                res.json("Added new user with name: "+user.name);      
             })
             .catch(err =>{
                 console.log("failed to add new user");
